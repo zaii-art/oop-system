@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Discounts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root { --primary: #1e7d4f; --accent: #f1c40f; --bg: #f4f6f8; --white: #ffffff; --text: #333; --border: #eef0f2; }
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:'Open Sans', sans-serif; }
+        body{ display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar{ width: 260px; padding: 40px 24px; background: var(--primary); color: white; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+        .logo{ display: flex; align-items: center; gap: 12px; margin-bottom: 50px; }
+        .logo h2{ font-family: 'Montserrat', sans-serif; color: var(--accent); font-size: 24px; }
+        .menu a{ display: flex; align-items: center; gap: 15px; text-decoration: none; color: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; transition: 0.3s; font-weight: 600; font-size: 14px; }
+        .menu a.active{ background: var(--accent); color: var(--text); }
+        .menu a:hover:not(.active) { background: rgba(255,255,255,0.1); }
+
+        /* MAIN CONTENT */
+        .main{ flex: 1; padding: 40px; min-width: 0; }
+        .top-bar{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .top-bar h1 { font-family: 'Montserrat', sans-serif; font-size: 28px; }
+
+        /* FLASH MESSAGES & TOASTS */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; width: 320px; }
+        .flash-msg { 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: opacity 0.6s ease, transform 0.6s ease; 
+        }
+        .flash-error { background: #fff1f1; color: #e74c3c; border: 1px solid #feb2b2; }
+        .flash-warning { background: #fff9db; color: #856404; border: 1px solid #ffeeba; }
+        .flash-success { background: #e6fffa; color: #2ecc71; border: 1px solid #b2f5ea; }
+        .fade-out { opacity: 0; transform: translateY(-20px); }
+
+        /* TABLE & MODAL CSS */
+        .table-card { background: var(--white); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 10px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: #f8f9fa; padding: 15px 10px; text-align: left; font-size: 12px; text-transform: uppercase; color: #777; border-bottom: 2px solid var(--border); }
+        td { padding: 20px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; word-wrap: break-word; }
+        .col-name { width: 25%; } .col-type { width: 12%; text-align: center; } .col-val { width: 12%; text-align: center; } .col-target { width: 20%; } .col-status { width: 15%; text-align: center; } .col-action { width: 16%; text-align: center; }
+        .badge { display: inline-flex; justify-content: center; align-items: center; width: 95px; padding: 6px 0; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .active-status { background: #e6fffa; color: #2ecc71; border: 1px solid #b2f5ea; }
+        .upcoming-status { background: #fffaf0; color: #f39c12; border: 1px solid #fbd38d; }
+        .expired-status { background: #fff5f5; color: #e74c3c; border: 1px solid #feb2b2; }
+        .btn-main { padding: 8px 18px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: 0.3s; }
+        .action-group { display: flex; justify-content: center; gap: 8px; align-items: center; }
+        .action-btn { height: 34px; width: 34px; border-radius: 8px; font-size: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .edit-link { background: #eef6ff; color: #3498db; } .delete-link { background: #fff1f1; color: #e74c3c; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 550px; max-width: 90%; margin: 5vh auto; border-radius: 24px; overflow: hidden; }
+        .modal-header { padding: 20px 25px; background: #2f3640; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 25px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full { grid-column: span 2; }
+        label { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 5px; display: block; }
+        input, select { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-size: 14px; }
+        .modal-footer { padding: 20px; background: #f8f9fa; display: flex; justify-content: center; }
+
+        /* COLLISION ALERT BOX */
+        #collision-warning { 
+            display: none; 
+            background: #fff5f5; 
+            border: 1px solid #feb2b2; 
+            color: #c53030; 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            font-size: 13px; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="sidebar">
+    <div class="logo"><i class="fa-solid fa-chart-line"></i><h2>PPADM</h2></div>
+    <div class="menu">
+        <a href="{{ url_for('admin') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="{{ url_for('product_page') }}"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="{{ url_for('discounts_page') }}" class="active"><i class="fa-solid fa-percent"></i> Discounts</a>
+        <a href="{{ url_for('daily_reports_page') }}"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+        <a href="{{ url_for('login') }}" style="margin-top: 60px; opacity: 0.8;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="top-bar">
+        <h1>Manage Discounts</h1>
+        <button class="btn-main" onclick="openCreateModal()">+ Create Discount</button>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-name">Name / Date</th>
+                    <th class="col-type">Type</th>
+                    <th class="col-val">Value</th>
+                    <th class="col-target">Applies To</th>
+                    <th class="col-status">Status</th>
+                    <th class="col-action">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for id, d in discounts.items() %}
+                <tr>
+                    <td class="col-name">
+                        <div style="font-weight: 700;">{{ d.name }}</div>
+                        <div style="font-size: 11px; color: #888; margin-top: 4px;">{{ d.start_readable }}</div>
+                    </td>
+                    <td class="col-type"><span style="background: #f0f0f0; padding: 3px 8px; border-radius: 4px; font-size: 11px;">{{ d.type }}</span></td>
+                    <td class="col-val"><span style="font-weight: 700; color: {{ '#1e7d4f' if d.type=='Percentage' else '#3498db' }};">{{ d.value }}{{ '%' if d.type == 'Percentage' else ' ₱' }}</span></td>
+                    <td class="col-target">
+                        <div style="font-size: 13px;">
+                            {% if d.apply_type == 'product' %}
+                                <i class="fa-solid fa-tag"></i> {{ products[d.product_id].name if d.product_id in products else d.product_id }}
+                            {% else %}
+                                <i class="fa-solid fa-layer-group"></i> {{ d.category }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="col-status"><span class="badge {{ d.status.lower() }}-status">{{ d.status }}</span></td>
+                    <td class="col-action">
+                        <div class="action-group">
+                            {% if d.status == "Upcoming" %}
+                                <button class="action-btn edit-link" onclick="openEditModal('{{id}}', '{{d.name}}', '{{d.type}}', '{{d.value}}', '{{d.start}}', '{{d.end}}', '{{d.apply_type}}', '{{d.product_id}}', '{{d.category}}', '{{d.status}}')"><i class="fa-solid fa-pen"></i></button>
+                                <a class="action-btn delete-link" href="{{ url_for('delete_discount', discount_id=id) }}" onclick="return confirm('Delete this scheduled discount?')"><i class="fa-solid fa-trash"></i></a>
+                            
+                            {% elif d.status == "Active" %}
+                                <button class="action-btn edit-link" onclick="openEditModal('{{id}}', '{{d.name}}', '{{d.type}}', '{{d.value}}', '{{d.start}}', '{{d.end}}', '{{d.apply_type}}', '{{d.product_id}}', '{{d.category}}', '{{d.status}}')"><i class="fa-solid fa-pen"></i></button>
+                                <span style="font-size: 10px; color: #aaa; margin-left: 5px;"><i class="fa-solid fa-shield-halved"></i> Protected</span>
+                                
+                            {% else %}
+                                <i class="fa-solid fa-lock" style="color: #ccc;"></i>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="discountModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h3 id="modalTitle">Create Discount</h3><span onclick="closeModal()" style="cursor:pointer; font-size: 24px;">&times;</span></div>
+        <form id="discountForm" method="POST">
+            <div class="modal-body">
+                <div id="collision-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i> 
+                    <strong>Collision Detected:</strong> <span id="collision-details"></span>
+                </div>
+
+                <div id="activeInfo" style="display:none; background:#fff9db; color:#856404; padding:15px; border-radius:12px; margin-bottom:20px; font-size:13px; border-left: 5px solid #f1c40f;"><i class="fa-solid fa-circle-info"></i> <b>Active:</b> Only Name can be changed.</div>
+                
+                <div class="form-grid">
+                    <div class="full"><label>Name</label><input type="text" name="name" id="f_name" required></div>
+                    
+                    <div><label>Type</label>
+                        <select name="type" id="f_type" required>
+                            <option value="" disabled selected>-- Select Type --</option>
+                            <option value="Percentage">Percentage</option>
+                            <option value="Fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+
+                    <div><label>Value</label><input type="number" name="value" id="f_value" step="0.01" min="0.01" required></div>
+                    <div><label>Start Date</label><input type="datetime-local" name="start" id="f_start" required></div>
+                    <div><label>End Date</label><input type="datetime-local" name="end" id="f_end" required></div>
+                    
+                    <div class="full"><label>Apply To</label>
+                        <select name="apply_type" id="f_apply" onchange="toggleFormBoxes()" required>
+                            <option value="" disabled selected>-- Select Target --</option>
+                            <option value="product">Specific Product</option>
+                            <option value="category">Whole Category</option>
+                        </select>
+                    </div>
+
+                    <div id="pBox" class="full" style="display:none;"><label>Product</label>
+                        <select name="product_id" id="f_pid">
+                            <option value="" disabled selected>-- Select Product --</option>
+                            {% for pid, p in products.items() %}<option value="{{pid}}">{{p.name}}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="cBox" class="full" style="display:none;"><label>Category</label>
+                        <select name="category" id="f_cat">
+                            <option value="" disabled selected>-- Select Category --</option>
+                            {% for c in categories %}<option value="{{c}}">{{c}}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn-main" style="width:100%">Save Changes</button></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById("discountModal");
+    const form = document.getElementById("discountForm");
+    const toastContainer = document.getElementById("toast-container");
+    
+    let currentEditId = null;
+
+    // Convert Flask/Jinja data to JS object for collision checking
+    const existingDiscounts = {
+        {% for id, d in discounts.items() %}
+        "{{ id }}": {
+            id: "{{ id }}",
+            name: "{{ d.name }}",
+            start: new Date("{{ d.start }}"),
+            end: new Date("{{ d.end }}"),
+            apply_type: "{{ d.apply_type }}",
+            product_id: "{{ d.product_id }}",
+            category: "{{ d.category }}",
+            status: "{{ d.status }}"
+        },
+        {% endfor %}
+    };
+
+    function showToast(message, type = 'error') {
+        const toast = document.createElement('div');
+        toast.className = `flash-msg flash-${type}`;
+        toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-check')}"></i> ${message}`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => { toast.remove(); }, 600);
+        }, 3000);
+    }
+
+    window.onload = function() {
+        const messages = document.querySelectorAll('.flash-msg');
+        messages.forEach(msg => {
+            setTimeout(() => {
+                msg.classList.add('fade-out');
+                setTimeout(() => { msg.remove(); }, 600); 
+            }, 3000);
+        });
+    };
+
+    function isOverlapping(s1, e1, s2, e2) {
+        return s1 < e2 && s2 < e1;
+    }
+
+    function checkCollision() {
+        const warningBox = document.getElementById("collision-warning");
+        const details = document.getElementById("collision-details");
+        
+        const newStart = new Date(document.getElementById("f_start").value);
+        const newEnd = new Date(document.getElementById("f_end").value);
+        const newApply = document.getElementById("f_apply").value;
+        const newPid = document.getElementById("f_pid").value;
+        const newCat = document.getElementById("f_cat").value;
+
+        if (isNaN(newStart) || isNaN(newEnd)) return false;
+
+        for (const id in existingDiscounts) {
+            if (id === currentEditId) continue;
+            
+            const d = existingDiscounts[id];
+            if (d.status === "Expired") continue;
+
+            let targetsCollide = false;
+            if (newApply === 'product' && d.apply_type === 'product' && newPid === d.product_id) targetsCollide = true;
+            if (newApply === 'category' && d.apply_type === 'category' && newCat === d.category) targetsCollide = true;
+            
+            if (targetsCollide && isOverlapping(newStart, newEnd, d.start, d.end)) {
+                warningBox.style.display = "block";
+                details.innerText = `Conflicts with "${d.name}" schedule.`;
+                return true;
+            }
+        }
+        warningBox.style.display = "none";
+        return false;
+    }
+
+    ["f_start", "f_end", "f_apply", "f_pid", "f_cat"].forEach(id => {
+        document.getElementById(id).addEventListener("change", checkCollision);
+    });
+
+    form.onsubmit = function(e) {
+        const type = document.getElementById("f_type").value;
+        const applyType = document.getElementById("f_apply").value;
+        const val = parseFloat(document.getElementById("f_value").value);
+        const start = new Date(document.getElementById("f_start").value);
+        const end = new Date(document.getElementById("f_end").value);
+
+        if (!type) { showToast("Please select a discount type."); e.preventDefault(); return false; }
+        if (!applyType) { showToast("Please select what this discount applies to."); e.preventDefault(); return false; }
+        if (applyType === "product" && !document.getElementById("f_pid").value) { showToast("Please select a product."); e.preventDefault(); return false; }
+        if (applyType === "category" && !document.getElementById("f_cat").value) { showToast("Please select a category."); e.preventDefault(); return false; }
+
+        if (val <= 0) { showToast("Value must be greater than zero."); e.preventDefault(); return false; }
+        if (type === "Percentage" && val > 100) { showToast("Percentage cannot exceed 100%."); e.preventDefault(); return false; }
+        if (end <= start) { showToast("End date must be after start date."); e.preventDefault(); return false; }
+
+        if (checkCollision()) {
+            if (!confirm("Collision detected with another active discount. Proceed anyway?")) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    };
+
+    function openCreateModal() {
+        currentEditId = null;
+        document.getElementById("modalTitle").innerText = "Create New Discount";
+        document.getElementById("collision-warning").style.display = "none";
+        form.action = "{{ url_for('create_discount') }}";
+        form.reset();
+        lockFields(false);
+        toggleFormBoxes();
+        modal.style.display = "block";
+    }
+
+    function openEditModal(id, name, type, val, start, end, apply, pid, cat, status) {
+        currentEditId = id;
+        document.getElementById("modalTitle").innerText = "Edit Discount Settings";
+        document.getElementById("collision-warning").style.display = "none";
+        form.action = "/update_discount/" + id;
+        document.getElementById("f_name").value = name;
+        document.getElementById("f_type").value = type;
+        document.getElementById("f_value").value = val;
+        document.getElementById("f_start").value = start;
+        document.getElementById("f_end").value = end;
+        document.getElementById("f_apply").value = apply;
+        document.getElementById("f_pid").value = pid;
+        document.getElementById("f_cat").value = cat;
+        toggleFormBoxes();
+        lockFields(status === "Active");
+        modal.style.display = "block";
+    }
+
+    function lockFields(isLocked) {
+        document.getElementById("activeInfo").style.display = isLocked ? "block" : "none";
+        ["f_type", "f_value", "f_start", "f_end", "f_apply", "f_pid", "f_cat"].forEach(id => {
+            document.getElementById(id).disabled = isLocked;
+        });
+    }
+
+    function toggleFormBoxes() {
+        const val = document.getElementById("f_apply").value;
+        document.getElementById("pBox").style.display = val === "product" ? "block" : "none";
+        document.getElementById("cBox").style.display = val === "category" ? "block" : "none";
+        document.getElementById("f_pid").required = (val === "product");
+        document.getElementById("f_cat").required = (val === "category");
+        checkCollision();
+    }
+
+    function closeModal() { modal.style.display = "none"; }
+</script>
+</body>
+</html>

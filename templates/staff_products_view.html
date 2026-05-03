@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff - View Products</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2c3e50; /* Navy Blue for Staff */
+            --accent: #f1c40f;
+            --bg: #f4f6f8;
+            --white: #ffffff;
+            --text: #333;
+            --border: #eef0f2;
+        }
+
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:'Open Sans', sans-serif; }
+        body{ display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar{ 
+            width: 260px; padding: 40px 24px; background: var(--primary); 
+            color: white; flex-shrink: 0; position: sticky; top: 0; height: 100vh; 
+        }
+        .logo{ display: flex; align-items: center; gap: 12px; margin-bottom: 50px; }
+        .logo h2{ font-family: 'Montserrat', sans-serif; color: var(--accent); font-size: 24px; }
+        
+        .menu a{ 
+            display: flex; align-items: center; gap: 15px; text-decoration: none; 
+            color: white; padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; 
+            transition: 0.3s; font-weight: 600; font-size: 14px; 
+        }
+        .menu a.active{ background: var(--accent); color: var(--primary); }
+        .menu a:hover:not(.active) { background: rgba(255,255,255,0.1); }
+
+        /* MAIN CONTENT */
+        .main{ flex: 1; padding: 40px; min-width: 0; }
+        .top-bar{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .top-bar h1 { font-family: 'Montserrat', sans-serif; font-size: 28px; }
+
+        .table-card { 
+            background: var(--white); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+            padding: 20px; margin-bottom: 30px; overflow-x: auto;
+        }
+
+        .category-title {
+            font-family: 'Montserrat', sans-serif; font-size: 16px; color: var(--primary);
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px; text-transform: uppercase;
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background: #f8f9fa; padding: 12px 15px; text-align: left; font-size: 12px; 
+            text-transform: uppercase; color: #777; border-bottom: 2px solid var(--border);
+        }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+        .price-original { color: #888; text-decoration: line-through; font-size: 12px; }
+        .price-final { font-weight: 700; color: #2ecc71; font-size: 15px; } 
+        .savings-amt { color: #3498db; font-weight: 600; font-size: 13px; }
+
+        .discount-info {
+            background: #fff9db; border: 1px solid #f1c40f; padding: 4px 10px; border-radius: 6px; display: inline-block;
+        }
+        .discount-info b { color: #856404; font-size: 12px; }
+        .read-only-badge { background: #eef2f7; color: #7f8c8d; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo"><i class="fa-solid fa-user-tie" style="color: var(--accent);"></i><h2>PPADM</h2></div>
+    <div class="menu">
+        <a href="{{ url_for('staff') }}"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="{{ url_for('staff_product_page') }}" class="active"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="{{ url_for('staff_discounts_page') }}"><i class="fa-solid fa-percent"></i> Discounts</a>
+        
+        <a href="{{ url_for('staff_reports_page') }}"><i class="fa-solid fa-chart-bar"></i>Reports</a>
+        
+        <a href="{{ url_for('login') }}" style="margin-top: 60px; opacity: 0.8;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="top-bar">
+        <h1>Product Catalog</h1>
+        <span class="read-only-badge"><i class="fa-solid fa-eye"></i> View Mode</span>
+    </div>
+
+    {% for category in categories %}
+    <div class="table-card">
+        <div class="category-title">
+            <i class="fa-solid fa-layer-group"></i> {{ category }}
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Product Name</th>
+                    <th style="width: 15%;">Original</th>
+                    <th style="width: 15%;">Final Price</th>
+                    <th style="width: 15%;">Savings</th>
+                    <th style="width: 25%;">Active Discount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set check = namespace(found=false) %}
+                {% for p in products %}
+                    {% if p.category == category %}
+                        {% set check.found = true %}
+                        <tr>
+                            <td><b style="color: #333;">{{ p.name }}</b></td>
+                            <td><span class="price-original">₱{{ p.original }}</span></td>
+                            <td><span class="price-final">₱{{ p.final }}</span></td>
+                            <td><span class="savings-amt">₱{{ p.saved }}</span></td>
+                            <td>
+                                {% if p.discount %}
+                                    <div class="discount-info">
+                                        <b>{{ p.discount.name }}</b><br>
+                                        <span style="font-size: 11px; color: #666;">Active Promo</span>
+                                    </div>
+                                {% else %}
+                                    <span style="color: #ccc; font-style: italic; font-size: 12px;">None</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                {% if not check.found %}
+                <tr><td colspan="5" style="text-align: center; color: #aaa; padding: 20px;">No products in this category.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>

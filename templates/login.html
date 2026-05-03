@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+
+<style>
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Animated Gradient Background */
+body {
+    background: linear-gradient(-45deg, #2ecc71, #27ae60, #16a085, #1abc9c);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Falling Money */
+#money-container {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+}
+
+.money {
+    position: absolute;
+    color: gold;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity:1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity:0.8; }
+}
+
+/* Login Container */
+.container {
+    width: 900px;
+    height: 550px;
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 101;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* LEFT SIDE (FORM) */
+.left {
+    width: 50%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+}
+
+/* Back Button inside left panel */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 6px 12px;
+    background: rgba(241, 196, 15, 0.8);
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    transition: background 0.3s, transform 0.2s;
+}
+
+.back-btn:hover {
+    background: #f39c12;
+    transform: scale(1.05);
+}
+
+.left h2 {
+    margin: 60px 0 10px 0; /* leave space for back button */
+    font-size: 26px;
+    color: #f1c40f;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.left p {
+    color: #fff;
+    margin-bottom: 25px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 5px;
+    color: #f1c40f;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.5);
+    outline: none;
+    transition: border 0.3s;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+
+.input-group input::placeholder {
+    color: #eee;
+}
+
+.input-group input:focus {
+    border-color: #f1c40f;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #f1c40f;
+    border: none;
+    color: #333;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.register {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #fff;
+}
+
+.register a {
+    color: #f1c40f;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* RIGHT SIDE (DESIGN) */
+.right {
+    width: 50%;
+    background: url("{{ url_for('static', filename='discount.jpeg') }}") no-repeat center center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+
+<body>
+<!-- Falling Money Container -->
+<div id="money-container"></div>
+
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+        <!-- Back Button inside left panel -->
+        <a href="{{ url_for('intro') }}" class="back-btn">← Back</a>
+
+        <h2>Login</h2>
+        <p>Enter to get unlimited access to data & information.</p>
+
+        {% if message %}
+        <p style="color:green;">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter username" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit">Log In</button>
+        </form>
+
+        <div class="register">
+            Don’t have an account?
+            <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+    </div>
+</div>
+
+<!-- Falling Money Script -->
+<script>
+const symbols = ["$", "₱", "%"];
+const container = document.getElementById("money-container");
+
+for(let i=0; i<60; i++){
+    const span = document.createElement("span");
+    span.className="money";
+    span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+    span.style.left = Math.random()*100 + "vw";
+    span.style.animationDuration = (3 + Math.random()*5) + "s";
+    span.style.fontSize = (16 + Math.random()*24) + "px";
+    container.appendChild(span);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+<style>
+/* Reset */
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Animated Gradient Background */
+body {
+    background: linear-gradient(-45deg, #2ecc71, #27ae60, #16a085, #1abc9c);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color:#fff;
+    line-height:1.6;
+    position: relative;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+@keyframes gradientBG {
+    0% {background-position:0% 50%;}
+    50% {background-position:100% 50%;}
+    100% {background-position:0% 50%;}
+}
+
+/* Particles container (falling money behind everything) */
+#money-container {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0; /* behind everything */
+}
+
+.money {
+    position: absolute;
+    color: gold;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity:1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity:0.8; }
+}
+
+/* Navigation */
+nav {
+    position: sticky;
+    top:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 50px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    z-index:100;
+}
+
+nav a {
+    color:#fff;
+    text-decoration:none;
+    margin:0 15px;
+    font-weight:500;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    color:#f1c40f;
+}
+
+.btn-register {
+    background:#f1c40f;
+    color:#333;
+    padding:8px 18px;
+    border-radius:6px;
+    font-weight:bold;
+    transition: background 0.3s;
+}
+
+.btn-register:hover {
+    background:#d4ac0d;
+}
+
+/* Logo Enhancement */
+.logo {
+    font-family: 'Montserrat', sans-serif;
+    font-weight:700;
+    font-size:1.8rem;
+    background: linear-gradient(45deg, #f1c40f, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition: transform 0.3s;
+    z-index:101;
+}
+.logo:hover {
+    transform: scale(1.1);
+}
+.logo::before {
+    content:"💰";
+    font-size:1.5rem;
+}
+
+/* Header / Hero Section */
+header {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:80px 20px;
+    position: relative;
+    z-index:101;
+}
+
+header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size:3rem;
+    margin-bottom:20px;
+    color:#fff;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+}
+
+header p {
+    max-width:600px;
+    font-size:1.1rem;
+    margin-bottom:25px;
+    color:#f0f0f0;
+    text-shadow:1px 1px 5px rgba(0,0,0,0.3);
+}
+
+header .btn-get-started {
+    background:#f1c40f;
+    color:#333;
+    padding:12px 25px;
+    border-radius:6px;
+    font-weight:bold;
+    text-decoration:none;
+    transition: background 0.3s;
+}
+
+header .btn-get-started:hover {
+    background:#d4ac0d;
+}
+
+/* Sections */
+section {
+    max-width:900px;
+    margin:40px auto;
+    background: rgba(255,255,255,0.1);
+    padding:25px 35px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    opacity:0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+    position: relative;
+    z-index:101;
+}
+
+section.show {
+    opacity:1;
+    transform: translateY(0);
+}
+
+section h2 {
+    font-family:'Montserrat', sans-serif;
+    margin-bottom:15px;
+    color:#f1c40f;
+}
+
+section p, section li {
+    color:#fff;
+}
+
+ul {
+    list-style:none;
+    padding-left:0;
+}
+
+li {
+    margin-bottom:10px;
+    padding-left:20px;
+    position:relative;
+}
+
+li::before {
+    content:'✔';
+    color:#f1c40f;
+    position:absolute;
+    left:0;
+}
+
+/* Footer */
+footer {
+    text-align:center;
+    padding:20px;
+    color:#fff;
+    font-size:0.9rem;
+    position: relative;
+    z-index:101;
+}
+</style>
+</head>
+<body>
+
+<!-- Falling Money Container -->
+<div id="money-container"></div>
+
+<!-- Navigation -->
+<nav>
+    <div class="logo">PPADM</div>
+    <div>
+        <a href="#" onclick="toggleSection('features')">Features</a>
+        <a href="#" onclick="toggleSection('description')">Description</a>
+        <a href="#" onclick="toggleSection('aboutus')">About us</a>
+        <a href="{{ url_for('login') }}" class="btn-register">Register / Log in</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header>
+    <h1>Welcome to Product Pricing and Discount Management</h1>
+    <p>Manage your pricing, discounts, and products efficiently in one place with a clean and modern system.</p>
+    <a href="{{ url_for('login') }}" class="btn-get-started">Get Started</a>
+</header>
+
+<!-- Features Section -->
+<section id="features">
+    <h2>System Features</h2>
+    <ul>
+        <li><strong>Product Management:</strong> Organize products with accurate pricing.</li>
+        <li><strong>Smart Pricing Rules:</strong> Set prices automatically and maintain consistency.</li>
+        <li><strong>Easy Discount Creation:</strong> Create fixed or percentage discounts for products.</li>
+        <li><strong>Scheduled Promotions:</strong> Run timed promotions effortlessly.</li>
+        <li><strong>Automatic Price Updates:</strong> Calculate final prices without changing original values.</li>
+        <li><strong>Insights & Reports:</strong> Track discounts, promotions, and performance.</li>
+        <li><strong>Role-Based Access:</strong> Admin and staff access for secure management.</li>
+    </ul>
+</section>
+
+<!-- Description Section -->
+<section id="description">
+    <h2>Description</h2>
+    <p>A comprehensive system designed to efficiently manage product pricing, create and track discounts, and schedule promotional periods. It allows businesses to automate price adjustments, apply special offers, and ensure accurate and consistent pricing across all products. With this system, businesses can enhance sales strategies, streamline promotions, and provide customers with timely discounts and offers.</p>
+</section>
+
+<!-- About Us Section -->
+<section id="aboutus">
+    <h2>About Us</h2>
+    <p>We are Team Palautog guided by Ck Almazan with Paul Jay Noel Mapait, Nathaniel Gucor, and Gregorio Vitor dedicated to creating software that simplifies business management.<br><br>
+    Our Product Pricing and Discount Management System allows businesses to manage product pricing, create and track discounts, and run promotions automatically.<br><br>
+    By using our system, businesses save time, reduce errors, and improve their sales strategies.<br><br>
+    Our mission is to empower businesses with smart, efficient, and reliable tools for growth.</p>
+</section>
+
+<!-- Footer -->
+<footer>© 2026 CentralGold. All rights reserved.</footer>
+
+<!-- Falling Money Script -->
+<script>
+const symbols = ["$", "₱", "%"];
+const container = document.getElementById("money-container");
+
+for(let i=0; i<60; i++){
+    const span = document.createElement("span");
+    span.className="money";
+    span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+    span.style.left = Math.random()*100 + "vw";
+    span.style.animationDuration = (3 + Math.random()*5) + "s";
+    span.style.fontSize = (16 + Math.random()*24) + "px";
+    container.appendChild(span);
+}
+
+/* Section Toggle */
+function toggleSection(sectionId) {
+    const sections = ["features", "description", "aboutus"];
+    sections.forEach(function(id){
+        const el = document.getElementById(id);
+        if(id===sectionId){
+            el.classList.toggle('show');
+        } else {
+            el.classList.remove('show');
+        }
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2c3e50; /* Navy Blue for Staff identity */
+            --accent: #f1c40f;
+            --bg: #f4f6f8;
+            --white: #ffffff;
+            --text: #333;
+            --border: #eef0f2;
+        }
+
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:'Open Sans', sans-serif; }
+        body{ display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar{ 
+            width: 260px; 
+            padding: 40px 24px; 
+            background: var(--primary); 
+            color: white; 
+            flex-shrink: 0; 
+            position: sticky; 
+            top: 0; 
+            height: 100vh; 
+        }
+        .logo{ 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 50px; 
+        }
+        .logo h2{ font-family: 'Montserrat', sans-serif; color: var(--accent); font-size: 24px; }
+        
+        .menu a{ 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            text-decoration: none; 
+            color: white; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            transition: 0.3s; 
+            font-weight: 600; 
+            font-size: 14px; 
+        }
+        .menu a.active{ background: var(--accent); color: #2c3e50; }
+        .menu a:hover:not(.active) { background: rgba(255,255,255,0.1); }
+
+        /* MAIN CONTENT */
+        .main{ flex: 1; padding: 40px; min-width: 0; }
+        .top-bar{ margin-bottom: 40px; }
+        .top-bar h1 { font-family: 'Montserrat', sans-serif; font-size: 32px; color: var(--text); }
+        .top-bar p { color: #666; margin-top: 5px; }
+
+        /* DASHBOARD GRID */
+        .grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* DASHBOARD CARDS */
+        .card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .card i {
+            font-size: 32px;
+            color: var(--primary);
+            background: #f0f3f5;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 15px;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .badge-staff {
+            background: #eef2f7;
+            color: #7f8c8d;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <i class="fa-solid fa-user-tie" style="color: var(--accent); font-size: 24px;"></i>
+        <h2>PPADM</h2>
+    </div>
+
+    <div class="menu">
+        <a href="{{ url_for('staff') }}" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="{{ url_for('staff_product_page') }}"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="{{ url_for('staff_discounts_page') }}"><i class="fa-solid fa-percent"></i> Discounts</a>
+        <a href="{{ url_for('staff_reports_page') }}"><i class="fa-solid fa-chart-bar"></i>Reports</a>
+
+        <a href="{{ url_for('login') }}" style="margin-top: 60px; opacity: 0.8;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="top-bar">
+        <h1>Staff Portal</h1>
+        <p>Operational View • You are logged in as a <b>Staff Member</b></p>
+    </div>
+
+    <div class="grid">
+        <a href="{{ url_for('staff_product_page') }}" class="card">
+            <i class="fa-solid fa-box"></i>
+            <h2>Product Catalog</h2>
+            <p>Browse inventory and check product availability for customers.</p>
+            <span class="badge-staff">Read-Only Access</span>
+        </a>
+
+        <a href="{{ url_for('staff_discounts_page') }}" class="card">
+            <i class="fa-solid fa-percent"></i>
+            <h2>Active Discounts</h2>
+            <p>Monitor current promotions and apply them during service.</p>
+            <span class="badge-staff">View Only</span>
+        </a>
+
+        <a href="{{ url_for('daily_reports_page') }}" class="card">
+            <i class="fa-solid fa-chart-bar"></i>
+            <h2>Activity Reports</h2>
+            <p>View daily logs and operational performance summaries.</p>
+            <span class="badge-staff">Restricted View</span>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

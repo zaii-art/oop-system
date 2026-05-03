@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #1e7d4f;
+            --accent: #f1c40f;
+            --bg: #f4f6f8;
+            --white: #ffffff;
+            --text: #333;
+            --border: #eef0f2;
+        }
+
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:'Open Sans', sans-serif; }
+        body{ display: flex; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar{ 
+            width: 260px; 
+            padding: 40px 24px; 
+            background: var(--primary); 
+            color: white; 
+            flex-shrink: 0; 
+            position: sticky; 
+            top: 0; 
+            height: 100vh; 
+        }
+        .logo{ 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 50px; 
+        }
+        .logo h2{ font-family: 'Montserrat', sans-serif; color: var(--accent); font-size: 24px; }
+        
+        .menu a{ 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            text-decoration: none; 
+            color: white; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            margin-bottom: 12px; 
+            transition: 0.3s; 
+            font-weight: 600; 
+            font-size: 14px; 
+        }
+        .menu a.active{ background: var(--accent); color: var(--text); }
+        .menu a:hover:not(.active) { background: rgba(255,255,255,0.1); }
+
+        /* MAIN CONTENT */
+        .main{ flex: 1; padding: 40px; min-width: 0; }
+        .top-bar{ margin-bottom: 40px; }
+        .top-bar h1 { font-family: 'Montserrat', sans-serif; font-size: 32px; color: var(--text); }
+        .top-bar p { color: #666; margin-top: 5px; }
+
+        /* DASHBOARD GRID */
+        .grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* DASHBOARD CARDS */
+        .card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .card i {
+            font-size: 32px;
+            color: var(--primary);
+            background: #e9f5ee;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 15px;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .card .btn-go {
+            margin-top: auto;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .card:hover .btn-go {
+            gap: 12px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <i class="fa-solid fa-chart-line" style="color: var(--accent); font-size: 24px;"></i>
+        <h2>PPADM</h2>
+    </div>
+
+    <div class="menu">
+        <a href="{{ url_for('admin') }}" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="{{ url_for('product_page') }}"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="{{ url_for('discounts_page') }}"><i class="fa-solid fa-percent"></i> Discounts</a>
+        <a href="{{ url_for('daily_reports_page') }}"><i class="fa-solid fa-chart-bar"></i> Reports</a>
+
+        <a href="{{ url_for('login') }}" style="margin-top: 60px; opacity: 0.8;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="top-bar">
+        <h1>Welcome Back, Admin!</h1>
+        <p>Monitor your system and manage your business performance today.</p>
+    </div>
+
+    <div class="grid">
+        <a href="{{ url_for('product_page') }}" class="card">
+            <i class="fa-solid fa-box"></i>
+            <h2>Manage Products</h2>
+            <p>Add, update, and organize your inventory categories and items efficiently.</p>
+            <div class="btn-go">Access Inventory <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="{{ url_for('discounts_page') }}" class="card">
+            <i class="fa-solid fa-percent"></i>
+            <h2>Manage Discounts</h2>
+            <p>Create percentage or fixed price promotions for specific categories or items.</p>
+            <div class="btn-go">Manage Promos <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+
+        <a href="{{ url_for('daily_reports_page') }}" class="card">
+            <i class="fa-solid fa-chart-bar"></i>
+            <h2>System Reports</h2>
+            <p>Analyze sales trends, system logs, and view general performance data in real-time.</p>
+            <div class="btn-go">View Analytics <i class="fa-solid fa-arrow-right"></i></div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

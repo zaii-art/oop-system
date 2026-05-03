@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+
+<style>
+/* Reset */
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* Animated Gradient Background */
+body {
+    background: linear-gradient(-45deg, #2ecc71, #27ae60, #16a085, #1abc9c);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    color: #fff;
+}
+
+@keyframes gradientBG {
+    0% { background-position:0% 50%; }
+    50% { background-position:100% 50%; }
+    100% { background-position:0% 50%; }
+}
+
+/* Falling Money */
+#money-container {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+}
+
+.money {
+    position: absolute;
+    color: gold;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity:1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity:0.8; }
+}
+
+/* Container */
+.container {
+    width: 600px;  /* increased width */
+    padding: 60px; /* increased padding */
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 101;
+}
+
+/* Back Button */
+.back-link {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 8px 14px;
+    background: rgba(241,196,15,0.8);
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    transition: background 0.3s, transform 0.2s;
+}
+
+.back-link:hover {
+    background: #f39c12;
+    transform: scale(1.05);
+}
+
+/* Heading */
+h2 {
+    color: #f1c40f;
+    text-align: center;
+    margin-top: 40px; /* leave space for back button */
+    margin-bottom: 30px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px;
+}
+
+/* Messages */
+.message {
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.message.error {
+    color: red;
+}
+
+.message.success {
+    color: #f1c40f;
+}
+
+/* Form */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 8px;
+    color: #f1c40f;
+    font-weight: 500;
+}
+
+input {
+    padding: 12px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.5);
+    outline: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 15px;
+    transition: border 0.3s;
+}
+
+input::placeholder {
+    color: #eee;
+}
+
+input:focus {
+    border-color: #f1c40f;
+}
+
+button {
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    background: #f1c40f;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+<!-- Falling Money Container -->
+<div id="money-container"></div>
+
+<div class="container">
+    <!-- Back Button -->
+    <a href="{{ url_for('login') }}" class="back-link">← Back</a>
+
+    <h2>Register Account</h2>
+
+    {% if message %}
+    <p class="message {{ message_type }}">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" placeholder="Enter your username" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" placeholder="Enter your password" required>
+
+        <button type="submit">Register</button>
+    </form>
+</div>
+
+<!-- Falling Money Script -->
+<script>
+const symbols = ["$", "₱", "%"];
+const containerMoney = document.getElementById("money-container");
+
+for(let i=0; i<60; i++){
+    const span = document.createElement("span");
+    span.className="money";
+    span.innerText = symbols[Math.floor(Math.random()*symbols.length)];
+    span.style.left = Math.random()*100 + "vw";
+    span.style.animationDuration = (3 + Math.random()*5) + "s";
+    span.style.fontSize = (18 + Math.random()*28) + "px";
+    containerMoney.appendChild(span);
+}
+</script>
+</body>
+</html>
