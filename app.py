@@ -8,9 +8,8 @@ app.secret_key = "secret123"
 
 
 class BaseEntity(ABC):
-    
     def __init__(self, id):
-        self._id = id 
+        self._id = id
 
     @property
     def id(self):
@@ -24,10 +23,11 @@ class BaseEntity(ABC):
     def get_status(self):
         pass
 
+
 class Discount(BaseEntity):
     def __init__(self, id, name, dtype, value, start, end, apply_type, product_id=None, category=None):
-        super().__init__(id)                    
-        self._name = name                       
+        super().__init__(id)
+        self._name = name
         self._type = dtype
         self._value = float(value)
         self._start = start
@@ -37,52 +37,68 @@ class Discount(BaseEntity):
         self._category = category
 
     @property
-    def name(self): return self._name
+    def name(self):
+        return self._name
 
     @name.setter
-    def name(self, value): self._name = value
+    def name(self, value):
+        self._name = value
 
     @property
-    def type(self): return self._type
+    def type(self):
+        return self._type
 
     @type.setter
-    def type(self, value): self._type = value
+    def type(self, value):
+        self._type = value
 
     @property
-    def value(self): return self._value
+    def value(self):
+        return self._value
 
     @value.setter
-    def value(self, v): self._value = v
+    def value(self, v):
+        self._value = v
 
     @property
-    def start(self): return self._start
+    def start(self):
+        return self._start
 
     @start.setter
-    def start(self, v): self._start = v
+    def start(self, v):
+        self._start = v
 
     @property
-    def end(self): return self._end
+    def end(self):
+        return self._end
 
     @end.setter
-    def end(self, v): self._end = v
+    def end(self, v):
+        self._end = v
 
     @property
-    def apply_type(self): return self._apply_type
+    def apply_type(self):
+        return self._apply_type
 
     @apply_type.setter
-    def apply_type(self, v): self._apply_type = v
+    def apply_type(self, v):
+        self._apply_type = v
 
     @property
-    def product_id(self): return self._product_id
+    def product_id(self):
+        return self._product_id
 
     @product_id.setter
-    def product_id(self, v): self._product_id = v
+    def product_id(self, v):
+        self._product_id = v
 
     @property
-    def category(self): return self._category
+    def category(self):
+        return self._category
 
     @category.setter
-    def category(self, v): self._category = v
+    def category(self, v):
+        self._category = v
 
     @property
     def start_dt(self):
@@ -95,9 +111,12 @@ class Discount(BaseEntity):
     def get_status(self):
         manila_tz = pytz.timezone('Asia/Manila')
         now = datetime.now(manila_tz).replace(tzinfo=None)
-        if now < self.start_dt:   return "Upcoming"
-        elif now > self.end_dt:   return "Expired"
-        else:                     return "Active"
+        if now < self.start_dt:
+            return "Upcoming"
+        elif now > self.end_dt:
+            return "Expired"
+        else:
+            return "Active"
 
     def calculate_discount(self, price):
         if self._type == "Percentage":
@@ -164,13 +183,16 @@ class Product(BaseEntity):
         self._category = category
 
     @property
-    def name(self): return self._name
+    def name(self):
+        return self._name
 
     @property
-    def price(self): return self._price
+    def price(self):
+        return self._price
 
     @property
-    def category(self): return self._category
+    def category(self):
+        return self._category
 
     def get_status(self):
         return "Available" if self._price > 0 else "Unavailable"
@@ -210,10 +232,12 @@ class User:
         self._role = role
 
     @property
-    def username(self): return self._username
+    def username(self):
+        return self._username
 
     @property
-    def role(self): return self._role
+    def role(self):
+        return self._role
 
     def check_password(self, password):
         return self._password == password
@@ -234,9 +258,12 @@ class ReportService:
 
         for d in self._discounts:
             status = d.get_status()
-            if status == "Upcoming":  stats["upcoming"] += 1
-            elif status == "Expired": stats["expired"] += 1
-            else:                     stats["active"] += 1
+            if status == "Upcoming":
+                stats["upcoming"] += 1
+            elif status == "Expired":
+                stats["expired"] += 1
+            else:
+                stats["active"] += 1
 
             if d.type == "Percentage":
                 stats["percentage_count"] += 1
@@ -245,8 +272,10 @@ class ReportService:
                 stats["fixed_count"] += 1
                 stats["total_fixed_val"] += d.value
 
-            if d.apply_type == "product": stats["product_target"] += 1
-            else:                         stats["category_target"] += 1
+            if d.apply_type == "product":
+                stats["product_target"] += 1
+            else:
+                stats["category_target"] += 1
 
         avg_perc = round(stats["total_perc_val"] / stats["percentage_count"], 1) if stats["percentage_count"] > 0 else 0
         avg_fixed = round(stats["total_fixed_val"] / stats["fixed_count"], 1) if stats["fixed_count"] > 0 else 0
@@ -265,8 +294,8 @@ class ReportService:
 
 
 users = {
-    "admin": User("admin", "123", "admin"),
-    "staff": User("staff", "123", "staff"),
+    "admin": User("ADMIN", "KING", "admin"),
+    "staff": User("STAFF", "SLAVE", "staff"),
 }
 
 products = {
@@ -353,14 +382,14 @@ def discounts_page():
 def create_discount():
     global discount_id_counter
     try:
-        name       = request.form["name"]
-        dtype      = request.form["type"]
-        value      = float(request.form["value"])
-        start      = request.form["start"]
-        end        = request.form["end"]
+        name = request.form["name"]
+        dtype = request.form["type"]
+        value = float(request.form["value"])
+        start = request.form["start"]
+        end = request.form["end"]
         apply_type = request.form["apply_type"]
         product_id = request.form.get("product_id")
-        category   = request.form.get("category")
+        category = request.form.get("category")
 
         if value <= 0:
             flash("Discount value must be greater than 0.", "error")
@@ -403,20 +432,20 @@ def update_discount(discount_id):
 
     if status == "Upcoming":
         try:
-            val   = float(request.form["value"])
+            val = float(request.form["value"])
             dtype = request.form["type"]
 
             if dtype == "Percentage" and val > 100:
                 flash("Percentage cannot exceed 100%.", "error")
                 return redirect(url_for("discounts_page"))
 
-            d.type       = dtype
-            d.value      = val
-            d.start      = request.form["start"]
-            d.end        = request.form["end"]
+            d.type = dtype
+            d.value = val
+            d.start = request.form["start"]
+            d.end = request.form["end"]
             d.apply_type = request.form["apply_type"]
             d.product_id = request.form.get("product_id")
-            d.category   = request.form.get("category")
+            d.category = request.form.get("category")
 
             flash("Discount updated successfully!", "success")
         except:
