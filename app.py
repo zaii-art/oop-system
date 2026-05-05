@@ -7,47 +7,27 @@ app = Flask(__name__)
 app.secret_key = "secret123"
 
 
-# =========================
-# ABSTRACT BASE CLASS
-# Demonstrates: Abstraction
-# =========================
-
 class BaseEntity(ABC):
-    """
-    Abstract class — cannot be instantiated directly.
-    Forces all subclasses to implement to_dict() and get_status().
-    """
-
+    
     def __init__(self, id):
-        self._id = id  # Encapsulation: protected attribute
+        self._id = id 
 
     @property
     def id(self):
-        """Encapsulation: controlled read access via property"""
         return self._id
 
     @abstractmethod
     def to_dict(self):
-        """Abstraction: every subclass MUST implement this"""
         pass
 
     @abstractmethod
     def get_status(self):
-        """Abstraction: every subclass MUST implement this"""
         pass
 
-
-# =========================
-# DISCOUNT CLASS
-# Demonstrates: Inheritance, Constructor, Encapsulation
-# =========================
-
 class Discount(BaseEntity):
-    """Inherits from BaseEntity. Base class for all discount types."""
-
     def __init__(self, id, name, dtype, value, start, end, apply_type, product_id=None, category=None):
-        super().__init__(id)                    # Inheritance: calls BaseEntity.__init__
-        self._name = name                       # Encapsulation: protected attributes
+        super().__init__(id)                    
+        self._name = name                       
         self._type = dtype
         self._value = float(value)
         self._start = start
@@ -55,8 +35,6 @@ class Discount(BaseEntity):
         self._apply_type = apply_type
         self._product_id = product_id
         self._category = category
-
-    # --- Encapsulation: Getters and Setters via @property ---
 
     @property
     def name(self): return self._name
@@ -115,7 +93,6 @@ class Discount(BaseEntity):
         return datetime.strptime(self._end, "%Y-%m-%dT%H:%M")
 
     def get_status(self):
-        """Polymorphism: can be overridden in subclasses"""
         manila_tz = pytz.timezone('Asia/Manila')
         now = datetime.now(manila_tz).replace(tzinfo=None)
         if now < self.start_dt:   return "Upcoming"
@@ -123,13 +100,11 @@ class Discount(BaseEntity):
         else:                     return "Active"
 
     def calculate_discount(self, price):
-        """Base discount logic — overridden by subclasses (Polymorphism)"""
         if self._type == "Percentage":
             return price * self._value / 100
         return self._value
 
     def to_dict(self):
-        """Implements abstract method from BaseEntity"""
         return {
             "id": self._id,
             "name": self._name,
@@ -146,19 +121,11 @@ class Discount(BaseEntity):
         }
 
 
-# =========================
-# DISCOUNT SUBCLASSES
-# Demonstrates: Inheritance + Polymorphism
-# =========================
-
 class PercentageDiscount(Discount):
-    """Inherits Discount. Overrides calculate_discount() — Polymorphism."""
-
     def __init__(self, id, name, value, start, end, apply_type, product_id=None, category=None):
         super().__init__(id, name, "Percentage", value, start, end, apply_type, product_id, category)
 
     def calculate_discount(self, price):
-        """Polymorphism: percentage-based deduction"""
         return round(price * self._value / 100, 2)
 
     def to_dict(self):
@@ -168,13 +135,10 @@ class PercentageDiscount(Discount):
 
 
 class FixedDiscount(Discount):
-    """Inherits Discount. Overrides calculate_discount() — Polymorphism."""
-
     def __init__(self, id, name, value, start, end, apply_type, product_id=None, category=None):
         super().__init__(id, name, "Fixed", value, start, end, apply_type, product_id, category)
 
     def calculate_discount(self, price):
-        """Polymorphism: flat fixed deduction"""
         return round(min(self._value, price), 2)
 
     def to_dict(self):
@@ -183,14 +147,7 @@ class FixedDiscount(Discount):
         return data
 
 
-# =========================
-# DISCOUNT FACTORY
-# Demonstrates: Polymorphism (creates correct subclass)
-# =========================
-
 class DiscountFactory:
-    """Creates the correct Discount subclass based on type."""
-
     @staticmethod
     def create(id, name, dtype, value, start, end, apply_type, product_id=None, category=None):
         if dtype == "Percentage":
@@ -199,14 +156,7 @@ class DiscountFactory:
             return FixedDiscount(id, name, value, start, end, apply_type, product_id, category)
 
 
-# =========================
-# PRODUCT CLASS
-# Demonstrates: Inheritance, Constructor, Encapsulation, Polymorphism
-# =========================
-
 class Product(BaseEntity):
-    """Inherits from BaseEntity."""
-
     def __init__(self, id, name, price, category):
         super().__init__(id)
         self._name = name
@@ -223,17 +173,9 @@ class Product(BaseEntity):
     def category(self): return self._category
 
     def get_status(self):
-        """
-        Polymorphism: same method name as Discount.get_status()
-        but completely different behavior — checks availability, not time.
-        """
         return "Available" if self._price > 0 else "Unavailable"
 
     def get_final_price(self, discount_list):
-        """
-        Uses polymorphic calculate_discount() —
-        works transparently with PercentageDiscount or FixedDiscount.
-        """
         final_price = self._price
         active_discount = None
 
@@ -244,7 +186,7 @@ class Product(BaseEntity):
                     (d.apply_type == "category" and d.category == self._category)
                 )
                 if applies:
-                    deduction = d.calculate_discount(self._price)  # Polymorphic call
+                    deduction = d.calculate_discount(self._price)
                     final_price = self._price - deduction
                     active_discount = d
                     break
@@ -261,14 +203,7 @@ class Product(BaseEntity):
         }
 
 
-# =========================
-# USER CLASS
-# Demonstrates: Classes & Objects, Constructor, Encapsulation
-# =========================
-
 class User:
-    """Encapsulates user data and authentication logic."""
-
     def __init__(self, username, password, role):
         self._username = username
         self._password = password
@@ -281,18 +216,10 @@ class User:
     def role(self): return self._role
 
     def check_password(self, password):
-        """Encapsulation: password check logic kept inside the class"""
         return self._password == password
 
 
-# =========================
-# REPORT SERVICE CLASS
-# Demonstrates: Encapsulation, Classes & Objects
-# =========================
-
 class ReportService:
-    """Encapsulates all report and statistics logic."""
-
     def __init__(self, discount_list):
         self._discounts = discount_list
 
@@ -337,10 +264,6 @@ class ReportService:
         }
 
 
-# =========================
-# DATA STORAGE
-# =========================
-
 users = {
     "admin": User("admin", "123", "admin"),
     "staff": User("staff", "123", "staff"),
@@ -361,12 +284,7 @@ discount_id_counter = 1
 categories = ["Clothing", "Footwear", "Accessories", "Kitchen"]
 
 
-# =========================
-# HELPER FUNCTION
-# =========================
-
 def build_product_list(discount_objs):
-    """Shared logic for admin and staff product views."""
     product_list = []
     for p in products.values():
         final, disc = p.get_final_price(discount_objs)
@@ -382,10 +300,6 @@ def build_product_list(discount_objs):
     return product_list
 
 
-# =========================
-# ROUTES — ALL ORIGINAL ROUTES PRESERVED
-# =========================
-
 @app.route("/")
 def intro():
     return render_template("index.html")
@@ -393,7 +307,6 @@ def intro():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Uses User.check_password() — Encapsulation"""
     message = ""
     if request.method == "POST":
         username = request.form["username"]
@@ -408,7 +321,6 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Creates a new User object — Classes & Objects, Constructor"""
     message, message_type = "", ""
     if request.method == "POST":
         username = request.form["username"]
@@ -416,7 +328,7 @@ def register():
         if username in users:
             message, message_type = "Username already exists.", "error"
         else:
-            users[username] = User(username, password, "staff")  # Object instantiation
+            users[username] = User(username, password, "staff")
             message, message_type = "Account successfully created.", "success"
     return render_template("register.html", message=message, message_type=message_type)
 
@@ -433,14 +345,12 @@ def staff():
 
 @app.route("/discounts")
 def discounts_page():
-    """Polymorphism: to_dict() returns different data per subclass"""
     dict_discounts = {k: v.to_dict() for k, v in discounts.items()}
     return render_template("discounts.html", discounts=dict_discounts, products=products, categories=categories)
 
 
 @app.route("/create_discount", methods=["POST"])
 def create_discount():
-    """Uses DiscountFactory — Polymorphism picks the right subclass"""
     global discount_id_counter
     try:
         name       = request.form["name"]
@@ -478,7 +388,6 @@ def create_discount():
 
 @app.route("/update_discount/<discount_id>", methods=["POST"])
 def update_discount(discount_id):
-    """Uses Discount setters — Encapsulation (controlled attribute updates)"""
     if discount_id not in discounts:
         flash("Discount not found.", "error")
         return redirect(url_for("discounts_page"))
@@ -490,7 +399,7 @@ def update_discount(discount_id):
         flash("Expired discounts cannot be edited.", "error")
         return redirect(url_for("discounts_page"))
 
-    d.name = request.form["name"]   # Encapsulation: uses setter
+    d.name = request.form["name"]
 
     if status == "Upcoming":
         try:
@@ -532,7 +441,6 @@ def delete_discount(discount_id):
 
 @app.route("/products")
 def product_page():
-    """Polymorphism: get_final_price() calls calculate_discount() per subclass"""
     product_list = build_product_list(list(discounts.values()))
     return render_template("products.html", products=product_list, categories=categories)
 
@@ -545,14 +453,12 @@ def staff_product_page():
 
 @app.route("/staff_discounts")
 def staff_discounts_page():
-    """Polymorphism: to_dict() called on each discount object"""
     dict_discounts = {k: v.to_dict() for k, v in discounts.items()}
     return render_template("staff_discounts_view.html", discounts=dict_discounts, products=products)
 
 
 @app.route("/daily_reports")
 def daily_reports_page():
-    """Uses ReportService object — Encapsulation"""
     report = ReportService(list(discounts.values()))
     data = report.get_stats()
     return render_template("reports.html", **data)
@@ -560,7 +466,6 @@ def daily_reports_page():
 
 @app.route("/staff_reports")
 def staff_reports_page():
-    """Same ReportService reused — Classes & Objects"""
     report = ReportService(list(discounts.values()))
     data = report.get_stats()
     return render_template("staff_reports.html", **data)
