@@ -294,8 +294,8 @@ class ReportService:
 
 
 users = {
-    "admin": User("hari", "king", "admin"),
-    "staff": User("alipin", "slave", "staff"),
+    "HARI": User("HARI", "king", "admin"),
+    "ALIPIN": User("ALIPIN", "slave", "staff"),
 }
 
 products = {
